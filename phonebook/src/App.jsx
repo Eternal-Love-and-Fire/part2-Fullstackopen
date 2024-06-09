@@ -1,12 +1,13 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import { create, destroy, getAll, update } from "./services/helpers";
-import {Form, Filter, PersonsList} from './components'
+import { Form, Filter, PersonsList } from "./components";
 
 function App() {
   const [persons, setPersons] = useState();
   const [filteredPersons, setFilteredPersons] = useState(persons);
   const [successMessage, setSuccessMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(false);
 
   useEffect(() => {
     getAll()
@@ -77,10 +78,16 @@ function App() {
     }, 3000);
   };
   const handleDelete = (id) => {
-    const users = persons.filter((item) => item.id !== id);
-    setPersons(users);
-    setFilteredPersons(users);
-    destroy(id);
+    destroy(id)
+      .then(() => {
+        const updatedPersons = persons.filter((item) => item.id !== id);
+        setPersons(updatedPersons);
+        setFilteredPersons(updatedPersons);
+      })
+      .catch(() => {
+        setErrorMessage("Error deleting person");
+        setTimeout(() => setErrorMessage(""), 3000);
+      });
   };
   console.log(successMessage);
   return (
@@ -97,6 +104,19 @@ function App() {
               }}
             >
               Added successfuly
+            </p>
+          ) : (
+            ""
+          )}
+          {errorMessage ? (
+            <p
+              style={{
+                backgroundColor: "red",
+                color: "blue",
+                fontSize: "2rem",
+              }}
+            >
+              Already had been removed
             </p>
           ) : (
             ""
